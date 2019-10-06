@@ -172,12 +172,18 @@ class CNNBase(NNBase):
 
         init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
                                constant_(x, 0), nn.init.calculate_gain('relu'))
-
+        print('num_inputs', num_inputs)
+        print('init_', type(init_))
         self.main = nn.Sequential(
-            init_(nn.Conv2d(num_inputs, 32, 8, stride=4)), nn.ReLU(),
-            init_(nn.Conv2d(32, 64, 4, stride=2)), nn.ReLU(),
-            init_(nn.Conv2d(64, 32, 3, stride=1)), nn.ReLU(), Flatten(),
-            init_(nn.Linear(32 * 7 * 7, hidden_size)), nn.ReLU())
+            # print('num_inputs',num_inputs)
+            # init_(nn.Conv2d(num_inputs, 32, 8, stride=4)), nn.ReLU(),
+
+            init_(nn.Conv2d(num_inputs, 512, 3, stride=1)), nn.ReLU(),
+            init_(nn.Conv2d(512, 32, 2)), nn.ReLU(), Flatten(),
+            # init_(nn.Linear(32 * 7 * 7, hidden_size)), nn.ReLU())2592
+            init_(nn.Linear(2592, hidden_size)), nn.ReLU())
+
+
 
         init_ = lambda m: init(m, nn.init.orthogonal_, lambda x: nn.init.
                                constant_(x, 0))
@@ -187,7 +193,9 @@ class CNNBase(NNBase):
         self.train()
 
     def forward(self, inputs, rnn_hxs, masks):
+        print('inputs',(inputs / 255.0).shape)
         x = self.main(inputs / 255.0)
+        print('x', x)
 
         if self.is_recurrent:
             x, rnn_hxs = self._forward_gru(x, rnn_hxs, masks)

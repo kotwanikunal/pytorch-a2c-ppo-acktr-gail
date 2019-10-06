@@ -5,8 +5,13 @@ import numpy as np
 import torch
 from gym.spaces.box import Box
 
+from nes_py.wrappers import JoypadSpace
+import gym_super_mario_bros
+from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
+
 from baselines import bench
 from baselines.common.atari_wrappers import make_atari, wrap_deepmind
+from baselines.common.retro_wrappers import make_retro, wrap_deepmind_retro
 from baselines.common.vec_env import VecEnvWrapper
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.shmem_vec_env import ShmemVecEnv
@@ -31,14 +36,21 @@ except ImportError:
 
 def make_env(env_id, seed, rank, log_dir, allow_early_resets):
     def _thunk():
+        is_mario = env_id.startswith("SuperMario")
+
         if env_id.startswith("dm"):
             _, domain, task = env_id.split('.')
             env = dm_control2gym.make(domain_name=domain, task_name=task)
+
+        # Kunal: Add any custom code for Mario
+        elif is_mario:
+            env = make_retro(game=env_id, state="Level1-1.state")
         else:
             env = gym.make(env_id)
 
         is_atari = hasattr(gym.envs, 'atari') and isinstance(
             env.unwrapped, gym.envs.atari.atari_env.AtariEnv)
+
         if is_atari:
             env = make_atari(env_id)
 
@@ -58,6 +70,9 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets):
         if is_atari:
             if len(env.observation_space.shape) == 3:
                 env = wrap_deepmind(env)
+        elif is_mario:
+            if len(env.observation_space.shape) == 3:
+                env = wrap_deepmind_retro(env)
         elif len(env.observation_space.shape) == 3:
             raise NotImplementedError(
                 "CNN models work only for atari,\n"
