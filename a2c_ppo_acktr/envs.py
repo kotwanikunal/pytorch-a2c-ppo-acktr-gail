@@ -11,7 +11,7 @@ from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 
 from baselines import bench
 from baselines.common.atari_wrappers import make_atari, wrap_deepmind
-from baselines.common.retro_wrappers import make_retro, wrap_deepmind_retro
+from .retro_wrappers import make_retro, wrap_deepmind_retro
 from baselines.common.vec_env import VecEnvWrapper
 from baselines.common.vec_env.dummy_vec_env import DummyVecEnv
 from baselines.common.vec_env.shmem_vec_env import ShmemVecEnv
