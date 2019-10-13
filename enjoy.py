@@ -34,6 +34,8 @@ parser.add_argument(
     help='whether to use a non-deterministic policy')
 args = parser.parse_args()
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 args.det = not args.non_det
 
 env = make_vec_envs(
@@ -42,7 +44,7 @@ env = make_vec_envs(
     1,
     None,
     None,
-    device='cpu',
+    device=device,
     allow_early_resets=False)
 
 # Get a render function
@@ -57,9 +59,9 @@ if vec_norm is not None:
     vec_norm.eval()
     vec_norm.ob_rms = ob_rms
 
-recurrent_hidden_states = torch.zeros(1,
-                                      actor_critic.recurrent_hidden_state_size)
-masks = torch.zeros(1, 1)
+recurrent_hidden_states = torch.zeros((1,
+                                      actor_critic.recurrent_hidden_state_size), device=device)
+masks = torch.zeros((1,1), device=device)
 
 obs = env.reset()
 

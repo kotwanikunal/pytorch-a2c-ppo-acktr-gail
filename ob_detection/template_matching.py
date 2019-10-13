@@ -31,11 +31,12 @@ class TemplateMatching:
                     False -> Filled bounding boxes at the location of the detected objects, on a black cancas
         '''
 
-        img_rgb = cv2.imread('ob_detection/images/frame.png') if frame is None else frame
-
+        img_rgb = cv2.imread('images/frame1.png') if frame is None else frame
+        # self.save_img(img_rgb, file_name='org')
         #Dont modify frame inplace
+        # print(img_rgb.shape)
         img_rgb = img_rgb.copy() 
-        img_final = img_rgb.copy() 
+        img_final = img_rgb.copy()
 
         #Fill the rectangles for matching templates. +ve: Dont Fill, -ve: Fill
         fill = 1 
@@ -57,8 +58,11 @@ class TemplateMatching:
             w,h = self.template_dims[name]
             for pt in zip(*loc[::-1]):
                 cv2.rectangle(img_final, pt, (pt[0] + w, pt[1] + h), colors[name], fill)
-
+        # self.save_img(img_final, file_name='res1')
         return img_final
 
     def save_img(self, img, file_name='res'):
-        cv2.imwrite(f'ob_detection/images/{file_name}.png',img)
+        cv2.imwrite(f'images/{file_name}.png',img)
+
+# tm = TemplateMatching()
+# tm.match_templates(compress=True)

@@ -5,10 +5,6 @@ import numpy as np
 import torch
 from gym.spaces.box import Box
 
-from nes_py.wrappers import JoypadSpace
-import gym_super_mario_bros
-from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
-
 from baselines import bench
 from baselines.common.atari_wrappers import make_atari, wrap_deepmind
 from .retro_wrappers import make_retro, wrap_deepmind_retro
@@ -81,7 +77,8 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets):
 
         # If the input has shape (W,H,3), wrap for PyTorch convolutions
         obs_shape = env.observation_space.shape
-        if len(obs_shape) == 3 and obs_shape[2] in [1, 3]:
+        # print('Obs shape: ', obs_shape)
+        if len(obs_shape) == 3 and obs_shape[2] in [1, 4]:
             env = TransposeImage(env, op=[2, 0, 1])
 
         return env
