@@ -1,5 +1,6 @@
 import copy
 import glob
+import cv2
 import os
 import time
 from collections import deque
@@ -118,6 +119,7 @@ def main():
 
             # Obser reward and next obs
             obs, reward, done, infos = envs.step(action)
+            # save_img(obs, str(step))
 
             for info in infos:
                 if 'episode' in info.keys():
@@ -192,6 +194,8 @@ def main():
             evaluate(actor_critic, ob_rms, args.env_name, args.seed,
                      args.num_processes, eval_log_dir, device)
 
+def save_img(img, file_name='res'):
+    cv2.imwrite(f'images/{file_name}.png',cv2.UMat(img.cpu().numpy()[0:1, 0:1, : , :][0][0]))
 
 if __name__ == "__main__":
     main()

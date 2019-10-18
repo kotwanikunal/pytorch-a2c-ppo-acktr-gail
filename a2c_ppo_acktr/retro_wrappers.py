@@ -15,9 +15,7 @@ class ALEFrameDownSample(gym.Wrapper):
     
     def step(self, ac):
         ob, rew, done, info = self.env.step(ac)
-        # print('Original',ob)
         ob = self.tm.match_templates(ob, compress=True)
-        # print('Compressed', ob)
         return ob, rew, done, info
 
 class StochasticFrameSkip(gym.Wrapper):
@@ -53,6 +51,7 @@ class StochasticFrameSkip(gym.Wrapper):
                 ob, rew, done, info = self.env.step(self.curac)
             totrew += rew
             if done: break
+        # save_img(ob, "Stoch Frame")
         return ob, totrew, done, info
 
     def seed(self, s):
@@ -212,29 +211,6 @@ class StartDoingRandomActionsWrapper(gym.Wrapper):
                 self.some_random_steps()
         return self.last_obs, rew, done, info
 
-def make_retro(*, game, state=None, max_episode_steps=4500, **kwargs):
-    import retro
-    if state is None:
-        state = retro.State.DEFAULT
-    env = retro.make(game, state, **kwargs)
-    # env = ALEFrameDownSample(env)
-    env = StochasticFrameSkip(env, n=4, stickprob=0.25)
-    if max_episode_steps is not None:
-        env = TimeLimit(env, max_episode_steps=max_episode_steps)
-    return env
-
-def wrap_deepmind_retro(env, scale=True, frame_stack=4):
-    """
-    Configure environment for retro games, using config similar to DeepMind-style Atari in wrap_deepmind
-    """
-    env = WarpFrame(env)
-    env = ClipRewardEnv(env)
-    if frame_stack > 1:
-        env = FrameStack(env, frame_stack)
-    if scale:
-        env = ScaledFloatFrame(env)
-    return env
-
 class SonicDiscretizer(gym.ActionWrapper):
     """
     Wrap a gym-retro environment and make it use discrete
@@ -292,3 +268,29 @@ class AllowBacktracking(gym.Wrapper):
         rew = max(0, self._cur_x - self._max_x)
         self._max_x = max(self._max_x, self._cur_x)
         return obs, rew, done, info
+
+def make_retro(*, game, state=None, max_episode_steps=4500, **kwargs):
+    import retro
+    if state is None:
+        state = retro.State.DEFAULT
+    env = retro.make(game, state, **kwargs)
+    # env = ALEFrameDownSample(env)
+    env = StochasticFrameSkip(env, n=4, stickprob=0.25)
+    if max_episode_steps is not None:
+        env = TimeLimit(env, max_episode_steps=max_episode_steps)
+    return env
+
+def wrap_deepmind_retro(env, scale=True, frame_stack=4):
+    """
+    Configure environment for retro games, using config similar to DeepMind-style Atari in wrap_deepmind
+    """
+    env = WarpFrame(env)
+    env = ClipRewardEnv(env)
+    if frame_stack > 1:
+        env = FrameStack(env, frame_stack)
+    if scale:
+        env = ScaledFloatFrame(env)
+    return env
+
+def save_img(img, file_name='res'):
+    cv2.imwrite(f'images/{file_name}.png',img)

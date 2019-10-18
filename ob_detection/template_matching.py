@@ -52,7 +52,7 @@ class TemplateMatching:
 
         for name, template in self.templates.items():
             res = cv2.matchTemplate(img_gray, template, self.config.get_method())
-            threshold = 0.7#TODO Move to config
+            threshold = 0.85#TODO Move to config
             loc = np.where(res >= threshold)
 
             w,h = self.template_dims[name]
@@ -62,7 +62,8 @@ class TemplateMatching:
         return img_final
 
     def save_img(self, img, file_name='res'):
-        cv2.imwrite(f'images/{file_name}.png',img)
+        print(file_name)
+        cv2.imwrite(f'images/{file_name}.png',cv2.UMat(img))
 
 # tm = TemplateMatching()
 # tm.match_templates(compress=True)

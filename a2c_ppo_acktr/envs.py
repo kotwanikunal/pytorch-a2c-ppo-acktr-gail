@@ -68,7 +68,7 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets):
                 env = wrap_deepmind(env)
         elif is_mario:
             if len(env.observation_space.shape) == 3:
-                env = wrap_deepmind_retro(env)
+                env = wrap_deepmind_retro(env, scale=False, frame_stack=0)
         elif len(env.observation_space.shape) == 3:
             raise NotImplementedError(
                 "CNN models work only for atari,\n"
@@ -78,7 +78,7 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets):
         # If the input has shape (W,H,3), wrap for PyTorch convolutions
         obs_shape = env.observation_space.shape
         # print('Obs shape: ', obs_shape)
-        if len(obs_shape) == 3 and obs_shape[2] in [1, 4]:
+        if len(obs_shape) == 3 and obs_shape[2] in [1, 3]:
             env = TransposeImage(env, op=[2, 0, 1])
 
         return env

@@ -5,6 +5,7 @@ import sys
 
 import numpy as np
 import torch
+import cv2
 
 from a2c_ppo_acktr.envs import VecPyTorch, make_vec_envs
 from a2c_ppo_acktr.utils import get_render_func, get_vec_normalize
@@ -75,6 +76,7 @@ if args.env_name.find('Bullet') > -1:
     for i in range(p.getNumBodies()):
         if (p.getBodyInfo(i)[0].decode() == "torso"):
             torsoId = i
+
 
 while True:
     with torch.no_grad():

@@ -5,6 +5,7 @@ from collections import deque
 import gym
 from gym import spaces
 import cv2
+from ob_detection.template_matching import *
 cv2.ocl.setUseOpenCL(False)
 from .wrappers import TimeLimit
 
@@ -140,6 +141,13 @@ class WarpFrame(gym.ObservationWrapper):
         observation should be warped.
         """
         super().__init__(env)
+
+        self.og_frames = []
+        self.ob_frames = []
+        self.final_frames = []
+        self.frame_count = 0
+
+        self.tm = TemplateMatching()
         self._width = width
         self._height = height
         self._grayscale = grayscale
@@ -169,13 +177,35 @@ class WarpFrame(gym.ObservationWrapper):
         else:
             frame = obs[self._key]
 
+        # save_img(obs, "OG Frame")
+        # self.og_frames.append(frame)
+
+        res_img = self.tm.match_templates(frame, compress=True)
+        # save_img(frame, "Processed Frame")
+        self.ob_frames.append(np.concatenate((frame, res_img), axis=0))
+
+        frame = res_img
+
         if self._grayscale:
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
         frame = cv2.resize(
-            frame, (self._width, self._height), interpolation=cv2.INTER_AREA
+            frame, (self._width, self._height), interpolation=cv2.INTER_LINEAR
         )
         if self._grayscale:
             frame = np.expand_dims(frame, -1)
+
+        # save_img(frame, "Final Frame")
+        self.final_frames.append(frame)
+
+        self.frame_count += 1
+
+        if self.frame_count % 1000 == 0:
+            # save_video(self.og_frames,"OGFrames"+str(self.frame_count))
+            # save_video(self.ob_frames,"OBFrames"+str(self.frame_count))
+            # save_video(self.final_frames,"FinalFrames"+str(self.frame_count))
+            # self.og_frames = []
+            self.ob_frames = []
+            # self.final_frames = []
 
         if self._key is None:
             obs = frame
@@ -288,3 +318,17 @@ def wrap_deepmind(env, episode_life=True, clip_rewards=True, frame_stack=False, 
         env = FrameStack(env, 4)
     return env
 
+def save_img(img, file_name='res'):
+    cv2.imwrite(f'images/{file_name}.png',img)
+
+def save_video(img_array, file_name):
+    fps = 12
+    height, width, layers = img_array[0].shape
+    size = (width, height)
+    # fourcc = cv2.VideoWriter_fourcc('X','V','I','D')
+    # fourcc = cv2.cv.CV_FOURCC('X','V','I','D')
+    out = cv2.VideoWriter(filename='images/'+file_name+'.avi', apiPreference=0, fourcc=cv2.VideoWriter_fourcc('X','V','I','D'), fps=float(fps), frameSize=size)
+    for frame in img_array:
+        out.write(frame)
+        # out.write(np.random.randint(0, 255, (width, height, layers)).astype('uint8'))
+    out.release()
