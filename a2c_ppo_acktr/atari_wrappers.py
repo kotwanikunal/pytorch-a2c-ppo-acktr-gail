@@ -180,11 +180,11 @@ class WarpFrame(gym.ObservationWrapper):
         # save_img(obs, "OG Frame")
         # self.og_frames.append(frame)
 
-        res_img = self.tm.match_templates(frame, compress=True)
+        # res_img = self.tm.match_templates(frame, compress=True)
         # save_img(frame, "Processed Frame")
-        self.ob_frames.append(np.concatenate((frame, res_img), axis=0))
+        # self.ob_frames.append(np.concatenate((frame, res_img), axis=0))
 
-        frame = res_img
+        # frame = res_img
 
         if self._grayscale:
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
